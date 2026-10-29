@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WakeQuest</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body data-view="setup">
+  <div id="serviceBanner" class="banner" role="alert" hidden></div>
+
+  <main>
+    <!-- Setup and armed: the night before -->
+    <section id="setupView" class="view view-setup" aria-labelledby="setupHeadline">
+      <header class="hero">
+        <p class="brand">WakeQuest</p>
+        <h1 id="setupHeadline" class="headline">No alarm armed yet.</h1>
+        <p id="setupSub" class="sub"></p>
+        <p id="actionMsg" class="action-msg" role="alert"></p>
+      </header>
+
+      <div class="setup-grid">
+        <ol class="steps">
+          <li class="step" id="stepDevice" data-done="false">
+            <h2>Connect your device</h2>
+            <p id="deviceStatus" class="state-line">Not connected</p>
+            <p id="deviceDetail" class="detail"></p>
+            <button id="connectBtn" type="button">Connect device</button>
+          </li>
+          <li class="step" id="stepSound" data-done="false">
+            <h2>Enable and test sound</h2>
+            <p id="soundStatus" class="state-line">Not tested</p>
+            <p id="soundDetail" class="detail">You should hear four short beeps.</p>
+            <button id="soundBtn" type="button">Enable and test sound</button>
+          </li>
+          <li class="step" id="stepArm" data-done="false">
+            <h2>Arm an alarm</h2>
+            <p id="armStatus" class="state-line">No alarm armed</p>
+            <p id="armDetail" class="detail"></p>
+          </li>
+        </ol>
+
+        <section class="alarms" aria-labelledby="alarmsTitle">
+          <h2 id="alarmsTitle">Alarms</h2>
+          <form id="alarmForm" novalidate>
+            <div class="field">
+              <label for="alarmName">Name</label>
+              <input id="alarmName" name="name" type="text" maxlength="60" autocomplete="off" placeholder="Weekday wake-up">
+            </div>
+            <div class="field">
+              <label for="alarmTime">Date and time</label>
+              <input id="alarmTime" name="localTime" type="datetime-local">
+            </div>
+            <button type="submit">Save alarm</button>
+            <p id="formError" class="form-error" role="alert"></p>
+          </form>
+          <ul id="alarmList" class="alarm-list"></ul>
+          <p id="alarmEmpty" class="detail">No alarms saved yet.</p>
+        </section>
+      </div>
+
+      <section class="presenter" aria-labelledby="presenterTitle">
+        <h2 id="presenterTitle">Presenter</h2>
+        <div class="presenter-actions">
+          <button id="testBtn" type="button">Test alarm in 10 seconds</button>
+          <button id="cancelTestBtn" type="button" class="quiet" hidden>Stop run (aborted)</button>
+          <button id="resetBtn" type="button" class="quiet">Reset demo</button>
+        </div>
+        <p id="presenterMsg" class="detail"></p>
+      </section>
+
+      <details id="logPanel" class="log">
+        <summary>Run log</summary>
+        <p class="detail">Study points so far: <strong id="studyPoints">0</strong>.
+          Download <a href="/api/sessions.csv">runs (CSV)</a> or <a href="/api/events.csv">all events (CSV)</a>.
+          Study exports without demo runs: <a href="/api/sessions.csv?mode=study">study runs</a>.</p>
+        <div class="table-wrap">
+          <table id="sessionsTable">
+            <thead><tr><th>Started</th><th>Run</th><th>Outcome</th><th>Alarm response time</th><th>Points</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- Ringing: the morning takeover -->
+    <section id="ringView" class="view view-ring" aria-labelledby="ringHeadline" hidden>
+      <p id="ringLabel" class="ring-label"></p>
+      <h1 id="ringHeadline" class="ring-headline">Pick up your device and tap it</h1>
+      <p id="ringElapsed" class="ring-elapsed"></p>
+      <ul id="ringIssues" class="ring-issues"></ul>
+      <button id="startSoundBtn" type="button" class="ring-sound" hidden>Start the alarm sound</button>
+      <button id="ringAbortBtn" type="button" class="corner">Presenter: stop run (aborted)</button>
+    </section>
+
+    <!-- Finished: completed or aborted -->
+    <section id="doneView" class="view view-done" aria-labelledby="doneHeadline" hidden>
+      <svg id="sun" class="sun" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+      <p id="doneLabel" class="done-label" hidden>Test alarm (demo run)</p>
+      <h1 id="doneHeadline" class="done-headline">Morning quest completed!</h1>
+      <p id="donePoints" class="done-points"></p>
+      <p id="doneTime" class="done-time"></p>
+      <p id="doneNote" class="detail"></p>
+      <button id="doneBtn" type="button">Back to setup</button>
+    </section>
+  </main>
+
+  <div id="srStatus" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

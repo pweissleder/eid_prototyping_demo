@@ -208,6 +208,15 @@ async def test_power_cycle_reboots(dev):
         assert h["sessionId"] is None and h["tapSeq"] == 0 and h["indicator"] is False
 
 
+async def test_power_on_while_powered_is_a_noop(dev):
+    async with connect(dev.uri, proxy=None) as ws:
+        await recv(ws, "hello")
+        await cmd(ws, {"type": "activate", "sessionId": "s-1"})
+        await dev.power_on(reboot=True)  # used to re-bind the port and raise
+        assert dev.session_id == "s-1" and dev.indicator is True
+        await cmd(ws, {"type": "deactivate", "sessionId": "s-1", "reason": "reset"})
+
+
 async def test_sensor_unstable_reported(dev):
     async with connect(dev.uri, proxy=None) as ws:
         await recv(ws, "hello")

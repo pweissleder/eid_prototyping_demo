@@ -117,6 +117,8 @@ class FakeDevice:
 
     async def power_on(self, reboot: bool = True) -> None:
         """Restore power. A real power loss reboots the board and clears its RAM."""
+        if self.powered:
+            return
         old = self._conn
         self._conn = None
         if old is not None:
