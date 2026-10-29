@@ -1,250 +1,254 @@
 # WakeQuest — Hardware and Software Prototyping Demo
 
-University course project · Initial requirements and evaluation brief · 29 October 2026
+University course project · 30 October 2026
 
-This is a proposed scope for development. The acceptance thresholds below are design targets to validate, not measured results. No hardware or software implementation is included yet.
-
-> **Hardware update (29 Oct 2026):** the indicator is the Elegoo RGB LED Module (Lesson 11) instead of the Seven-Color Flash Module, because that is the module available. It runs a firmware-generated color cycle from 3.3 V GPIOs.
-
-## 1. Problem description
-
-I often struggle to get out of bed when my morning alarm rings. Because I can dismiss or snooze an alarm beside my bed, stopping the sound does not necessarily mean that I have stood up or started my day.
-
-I want to explore whether placing an alarm controller across the room, and asking me to pick it up and tap it to stop the alarm, helps me get out of bed sooner. A website will let me set an alarm, check the hardware connection, and receive a small game-like reward after completing the physical interaction.
+WakeQuest is an alarm that you can only stop by getting out of bed. A website plays the alarm. You stop it by walking across the room, picking up an ESP32 controller and tapping it. While the alarm rings, the controller's RGB LED cycles through seven colours. An accepted tap stops the sound, switches the LED off and shows a reward on the website: "Morning quest completed!", 10 points and your alarm response time.
 
 **Main research question:** Do I get out of bed faster with this prototype than with my usual bedside alarm?
 
-**Secondary questions:** Is the tap interaction reliable and understandable? Do I stay out of bed afterwards? Does the success feedback feel motivating?
+## The demo process: start with the showcase
 
-The intended user is initially me: a student who struggles with dismissing morning alarms and going back to sleep. Classmates can help evaluate usability and the classroom demonstration.
+The whole process from idea to evidence is shown in **[`Prompts/Visualisations/showcase.html`](Prompts/Visualisations/showcase.html)**. Open it in a browser:
 
-## 2. Concept and prototype boundary
+```bash
+open Prompts/Visualisations/showcase.html
+```
 
-The prototype uses an ESP32-WROOM-32D with the Elegoo kit's Tap Module (also called Hit Sensor / knock switch) and RGB LED Module, connected to a website. The website plays the alarm sound. While it rings, the ESP32 firmware runs an automatic seven-color cycle on the RGB LED. The intended action is to get out of bed, pick up the controller across the room, and give it a deliberate tap. An accepted tap stops the sound, switches off the RGB LED, and triggers the website reward.
+It walks through each stage of the course process and the material produced at each one:
 
-| Part | Role in the prototype |
-| --- | --- |
-| Development board carrying an ESP32-WROOM-32D | Connects over Wi-Fi, reads the tap input, and controls the indicator. The WROOM module has no integrated accelerometer. |
-| Elegoo Tap Module / Hit Sensor, Lesson 5 | Supplies a digital knock/tap event. This is the initial-sprint input; no separate accelerometer is assumed. |
-| Elegoo RGB LED Module, Lesson 11 | Through-hole RGB LED Module (not the SMD one) with pins R, G, B, − (common cathode on −) and three onboard 150 Ω series resistors. While an alarm rings, the ESP32 firmware runs an automatic seven-color cycle on it (red, green, blue, yellow, cyan, magenta, white); it is off otherwise. Software scope is on/off of this cycle. |
-| Jumper wires; no extra interface components needed for the indicator | Adapt the kit's Arduino-oriented examples to 3.3 V ESP32 GPIO. The RGB LED Module is driven directly from three 3.3 V GPIOs through its onboard resistors, and the Tap Module is powered from 3.3 V, so no 5 V supply, level conversion, transistor, or MOSFET is needed for the indicator. |
-| Simple hand-held housing or secured mounting | Keeps the board and modules together while the user picks up and taps the device. |
-| USB power or a suitable power bank | Powers the development board while allowing the intended movement. |
-| Website on a laptop or phone | Creates alarms, shows connection and alarm status, plays sound, and displays rewards. |
-| Local service on the laptop | Holds the demo schedule, coordinates website/device messages, and records outcomes. |
+| Stage in the showcase | What it shows | Source files |
+|---|---|---|
+| 01 The initial input | The first prompt that started the project | [`Prompts/Phase 1 - Idea/initial_prompt.md`](Prompts/Phase%201%20-%20Idea/initial_prompt.md) |
+| 02–04 Problem → scenarios → requirements → user stories | The problem description, scenarios, functional and quality requirements, and prioritised user stories | [`Prompts/Phase 2 - Requirements Engineering/context.md`](Prompts/Phase%202%20-%20Requirements%20Engineering/context.md), full brief in [`docs/requirements.md`](docs/requirements.md) |
+| 05–06 Planning → implementation | The sprint plan: architecture, hardware setup, increments, test design | [`planning_prompt.md`](Prompts/Phase%203%20-%20Implementation%20Planning%20/planning_prompt.md), [`PLAN.md`](Prompts/Phase%203%20-%20Implementation%20Planning%20/PLAN.md) |
+| 07 Hypotheses → testing → re-evaluation | How the hypotheses are tested and the idea re-evaluated | [`docs/requirements.md` §8](docs/requirements.md#8-hypotheses-and-evaluation), [`docs/test-log.md`](docs/test-log.md) |
+| 08 The next iteration | How another team can reuse the same process | — |
 
-**Input decision:** The ESP32-WROOM-32D has no integrated accelerometer; see the [Espressif module datasheet](https://documentation.espressif.com/esp32-wroom-32d_esp32-wroom-32u_datasheet_en.html). Use the supplied Tap Module as the default input. A carrier board could have extra peripherals, but none are assumed without its own documentation.
+The companion page [`Prompts/Visualisations/test_protocol.html`](Prompts/Visualisations/test_protocol.html) is a fillable test protocol for the Stage A functional and classroom tests and the Stage B morning comparison.
 
-**Interaction limit:** The tap switch reports a knock/contact event, not acceleration, orientation, lifting, or standing. The demo therefore asks the user to pick up and tap the device. A tap while it remains on the shelf can also dismiss an active alarm; the hardware cannot enforce lifting. Physical distance is the behavioral intervention, and actual bed exit is measured separately. Incidental impacts may also trigger the switch and must be tested and reported.
+## Current status
 
-**Indicator decision:** The RGB LED Module shows a seven-color cycle (red, green, blue, yellow, cyan, magenta, white) generated by the ESP32 firmware. Enable it only while ringing and disable it afterwards; its colors and phases do not encode separate states, and color-specific status meanings are out of scope by decision (the module could show fixed colors). Website text communicates the alarm state.
+| Part | Status |
+|---|---|
+| Hardware bring-up (wiring, tap polarity, debounce, RGB mapping) | Done, confirmed on the bench; see [`docs/test-log.md`](docs/test-log.md) |
+| Firmware (Wi-Fi, mDNS, WebSocket, tap detection, LED cycle) | Done, checked with the device probe |
+| Local service (scheduler, session state machine, device link, event log) | Done, covered by pytest |
+| Website (setup, alarms, ringing screen, reward, presenter controls, log) | Done, covered by the Playwright suite |
+| First end-to-end run on real hardware | Done (test alarm: sound, LED, tap and reward all worked) |
+| Stage A test series, classmate sessions, overnight rehearsal, Stage B mornings | Still open; listed at the end of [`docs/test-log.md`](docs/test-log.md) |
 
-**Local references:** The supplied, untracked `Elegoo 37 Sensor Kit Tutorial for UNO R3 and Mega 2560 V1.0.0.2019.05.16/` folder contains the main tutorial's Lesson 5 (Two Shock Switch Module, PDF pages 45–49), Lesson 11 (SMD RGB Module and RGB Module, PDF pages 83–89; we use the through-hole RGB LED Module), `Datasheet/Lesson 5 Tilt Switch module/Hit Sensor Module.pdf`, and `Datasheet/Lesson 11 SMD RGB LED Module/RGB LED Module.pdf`. These are component references; adapt their UNO/Mega wiring and sample code to the ESP32. The kit tutorial notes that the module's PCB silkscreen swaps the red and blue labels, so check the channel mapping on the bench.
+## How it works
 
-## 3. Scenario
+```
+ Browser (web/)  ⇄  local service (wakequest/, FastAPI)  ⇄  ESP32 controller (firmware/wakequest/)
+   renders state      single source of truth:               WebSocket server on :81, wakequest.local
+   plays the sound    alarms, scheduler, state machine,      sends tap events, runs the LED cycle
+                      tap validation, points, event log      only while told to
+```
 
-**The night before:** I place the ESP32-WROOM-32D controller with its Tap Module and RGB LED Module on a shelf across the room, beyond reach from bed. I open the website, connect the board, enable and test the sound, and create an alarm for 07:00 tomorrow. The website confirms readiness and the alarm time. The RGB LED remains off while the alarm is only scheduled.
+- **Website:** plain HTML/CSS/JS served by the service, no build step. It renders the state snapshots that the service pushes over `/ws` and holds no business logic.
+- **Local service:** Python 3.12 with FastAPI and uvicorn. It schedules alarms, decides when a tap counts, derives points from completed study runs (they are never incremented), and writes `data/alarms.json` and `data/events.jsonl`. It connects to the controller as a WebSocket client.
+- **Firmware:** Arduino-ESP32. It joins a 2.4 GHz Wi-Fi network (a phone hotspot), advertises `wakequest.local`, debounces the tap input (250 ms lockout) and runs the colour cycle while an alarm rings. As a safety measure, the LED switches off after 15 minutes.
 
-**In the morning:** At 07:00, the website plays the alarm and the RGB LED module starts its seven-color cycle. The screen says, “Pick up your device and tap it to stop the alarm.” I get out of bed, walk across the room, pick up the controller, and tap it. The accepted tap stops the sound and switches off the RGB LED. The website shows “Morning quest completed!” with a short animation, 10 points, and my alarm response time.
+The REST/WebSocket contract is in [`docs/api.md`](docs/api.md), and the device protocol is in [`docs/protocol.md`](docs/protocol.md).
 
-**Afterwards:** I can see that the interaction was completed. Whether I actually stood up and whether I returned to bed are recorded separately; the tap switch cannot establish either outcome.
+## Hardware
 
-**Classroom version:** I explain the morning problem, place the controller away from my chair, and use “Test alarm in 10 seconds.” I stand, pick up and tap the controller, and show the indicator and website response.
+| Part | Details |
+|---|---|
+| Board | 38-pin DevKitC-style board with an ESP32-WROOM-32D and a CP2102 USB chip. 3.3 V logic; the GPIOs are **not** 5 V tolerant. Never use the `5V` pin. |
+| Tap Module (Elegoo Lesson 5) | `S` → GPIO27, middle pin (+) → `3V3`, `−` → `GND`. Idle HIGH through the module's pull-up; a tap reads LOW. |
+| RGB LED Module (Elegoo Lesson 11, through-hole, 150 Ω onboard) | `R` → GPIO26, `G` → GPIO25, `B` → GPIO33, `−` → `GND`. The printed labels are correct on this module. |
+| Power | USB cable or power bank with some slack, so the controller can be picked up. |
 
-## 4. Requirements
+Wiring diagram: [`docs/wiring.svg`](docs/wiring.svg). Breadboard positions, step-by-step wiring and the checks before first power-up are in [`PLAN.md` §3](Prompts/Phase%203%20-%20Implementation%20Planning%20/PLAN.md#3-intuitive-hardware-setup).
 
-All requirements in this section belong to the initial sprint. Later features are listed separately.
+## Setup (once)
 
-### Functional requirements
+You need macOS (the commands below use Homebrew; Linux works with the equivalent packages), [uv](https://docs.astral.sh/uv/), Node.js 20 or newer, and a 2.4 GHz Wi-Fi network that both the laptop and the ESP32 can join. A phone hotspot works; on an iPhone, turn on "Maximize Compatibility".
 
-| ID | Requirement |
-| --- | --- |
-| FR-01 | The user can create and view one-off alarms with a name and a future local date/time. Invalid or past times produce an understandable error. |
-| FR-02 | The user can connect the website to one configured ESP32-WROOM-32D development board and see connecting, connected, or disconnected status based on communication with the board. |
-| FR-03 | The user can arm an alarm after the board responds, the sensor is ready, and browser audio has been enabled and tested. The next scheduled alarm is clearly displayed. |
-| FR-04 | At the scheduled time, the system starts the audible alarm, enables the RGB LED module's seven-color cycle, and shows an active-alarm screen. |
-| FR-05 | While an alarm is active, a validated tap event from the connected device completes that alarm, stops the sound, and disables the RGB LED. Movement before activation cannot complete a future alarm. |
-| FR-06 | A completed alarm produces one success message, one short celebration, 10 points, and a clearly labeled alarm response time. Duplicate messages cannot award points twice. |
-| FR-07 | The system records the alarm session, mode, scheduled time, sound-start confirmation, activation acknowledgment, tap receipt, completion or abort, and connection failures. |
-| FR-08 | A presenter can run a labeled test alarm, reset the demonstration, and stop a run manually. A manual stop is recorded as aborted and earns no reward. |
-| FR-09 | Connection loss or missing activation acknowledgment is visibly reported. It must never be presented as successful completion. Reconnection restores the current session state without repeating a reward. |
+### 1. Service and website
 
-### Quality and interaction requirements
+```bash
+uv sync
+```
 
-| ID | Proposed acceptance target |
-| --- | --- |
-| QR-01 | On the tested, awake setup, audible alarm and RGB LED activation occur within 2 seconds of the scheduled time. Check 10 scheduled runs. |
-| QR-02 | In at least 19 of 20 deliberate tap trials, the sound stops, the RGB LED is disabled, and website feedback appears within 1 second of the physical tap. |
-| QR-03 | No tap completes an idle or merely armed alarm. During 20 active-alarm nuisance trials, record incidental dismissals from nearby movement, surface taps, and vibrations. A knock switch cannot identify the cause of an impact; report this limitation rather than claim verified pickup. |
-| QR-04 | The website reports a lost connection within 5 seconds. State and points remain consistent after duplicate messages and reconnection. |
-| QR-05 | At least 4 of 5 first-time testers can connect a preconfigured device, create an alarm, and complete it within 2 minutes without coaching after a short task introduction. |
-| QR-06 | A presenter can reset and prepare another classroom run in at most 30 seconds. |
-| QR-07 | The interface communicates state through text as well as color and animation. The RGB LED is enabled only while ringing and disabled otherwise. Its color cycle and phases do not encode separate states. |
+This installs Python 3.12 (from `.python-version`) and the service dependencies into `.venv/`.
 
-## 5. Constraints and assumptions
+### 2. End-to-end tests (optional)
 
-- **Small local prototype:** One user, one board, one local service, and one connected browser session. Use a prepared local Wi-Fi network; internet access is not required. ESP32 station mode supports connection to an access point. See [Espressif's Wi-Fi documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_wifi.html).
-- **Prepared connection:** Wi-Fi credentials can be configured before the demo. “Connect device” means connecting to and verifying the configured board; automatic device discovery and a full onboarding flow are outside the first sprint.
-- **Browser sound:** Include an explicit “Enable and test sound” action and handle playback errors. Browser autoplay restrictions can prevent sound without prior interaction. See [MDN's autoplay guide](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay).
-- **Awake host:** The laptop/service and browser must remain running and awake during the experiment. Closing the page, host sleep, power loss, and offline scheduling are outside the supported first-sprint conditions. Overnight use must first pass an overnight technical rehearsal on the chosen setup.
-- **Scheduling:** Use one-off alarms in the host's displayed local timezone. Allow multiple saved alarms but only one armed alarm at a time; arming another clearly replaces the previous selection. Repeating schedules, timezone changes, and daylight-saving transitions are outside the initial scope.
-- **Physical placement:** Put the device beyond reach from bed, at the same location for all prototype study mornings. The user must be able to lift it without pulling loose wires or a short power cable. The system cannot enforce placement or prevent deliberate bypassing.
-- **Tap input:** The Tap Module is a digital switch, not an accelerometer. Verify its idle/active polarity and debounce it so one physical tap produces at most one accepted event. The supplied prose and sample code disagree about polarity, so confirm the actual module on the bench. It cannot verify pickup or distinguish a deliberate tap from every accidental impact.
-- **Electrical compatibility:** ESP32 GPIO uses 3.3 V logic, while the kit tutorial targets 5 V UNO/Mega boards. Never connect a 5 V output directly to an ESP32 input. Power the Tap Module from 3.3 V so its signal never exceeds 3.3 V, and verify its contact/pull-up arrangement on the bench. The RGB LED Module needs no 5 V supply, level conversion, transistor, or MOSFET: drive its R, G, and B pins directly from three 3.3 V ESP32 GPIOs through the onboard 150 Ω series resistors, with the − pin on ground (red draws about 9 mA; green and blue are dimmer at 3.3 V because their forward voltage is 3.0–3.2 V). The kit tutorial notes that the PCB silkscreen swaps the red and blue labels, so check the actual channel mapping on the bench. Verify the actual pin labels before wiring; do not copy the Arduino pin numbers blindly. See the [Espressif electrical specifications](https://documentation.espressif.com/esp32-wroom-32d_esp32-wroom-32u_datasheet_en.html).
-- **Indicator scope:** The firmware only switches an automatic seven-color cycle (red, green, blue, yellow, cyan, magenta, white) on the RGB LED on while an alarm rings and off otherwise. Its colors and phases do not encode separate states; color-specific status meanings are out of scope by decision, although the module could show fixed colors.
-- **Power and construction:** Use readily available low-voltage components and a secured breadboard or simple enclosure. Custom PCB development, battery charging circuitry, and a manufactured enclosure are outside scope.
-- **Session persistence:** Keep the initial alarm list and event log locally for the demo/study. Automatic restart recovery, accounts, cloud synchronization, multiple users, and production deployment are outside scope.
-- **Research data:** Store only the timestamps, outcomes, and brief ratings needed for evaluation. Any observation or recording requires the participant's consent; retained logs use participant codes.
-- **Fixed parts:** Use an ESP32-WROOM-32D development board, the Elegoo Tap Module, and the Elegoo RGB LED Module. The exact carrier-board pin layout, GPIO assignments, course deadline, and available budget still need confirmation; no extra accelerometer is required for this scope.
+```bash
+npm ci
+```
 
-## 6. Initial sprint: user stories and acceptance criteria
+```bash
+npx playwright install chromium
+```
 
-**Sprint goal:** Demonstrate one complete path from creating an alarm to dismissing it with the tap module across the room and receiving a reward, with enough logging to evaluate the interaction.
+### 3. Firmware toolchain
 
-### US-01 — Create an alarm
+```bash
+brew install arduino-cli
+```
 
-As someone who struggles to get up, I want to create a named alarm for a future date and time so that I can prepare my next wake-up.
+```bash
+arduino-cli config init
+```
 
-- Given valid inputs, saving adds the alarm to the list with its local date/time and status.
-- Missing, invalid, or past times are rejected with an explanation.
-- Only one alarm can be armed; selecting another clearly replaces the current armed alarm.
-- Maps to FR-01 and FR-03.
+```bash
+arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+```
 
-### US-02 — Connect the hardware
+```bash
+arduino-cli core update-index
+```
 
-As a user, I want to connect my ESP32-WROOM-32D board and see its status so that I know the physical controller is available.
+```bash
+arduino-cli core install esp32:esp32@3.3.12
+```
 
-- Connecting to the configured board shows “Connected” only after a board response, with a device identifier.
-- An unavailable board shows a useful connection error and a retry action.
-- Loss of communication changes the status within 5 seconds.
-- Maps to FR-02 and FR-09.
+```bash
+arduino-cli lib install "WebSockets@2.7.2" "ArduinoJson@7.4.3"
+```
 
-### US-03 — Prepare and arm the alarm
+### 4. Wi-Fi credentials
 
-As a user, I want to check the sound and sensor before arming so that I can confirm the prototype is ready.
+Copy the example file and enter your hotspot's name and password in `secrets.h`:
 
-- “Enable and test sound” produces an audible preview or a visible playback error.
-- Arming requires a responding board, a tap input with a verified stable idle state, and a successful sound test.
-- The screen confirms the next alarm time; the RGB LED remains disabled while waiting.
-- Maps to FR-03.
+```bash
+cp firmware/wakequest/secrets.example.h firmware/wakequest/secrets.h
+```
 
-### US-04 — Recognize an active alarm
+`secrets.h` is gitignored. Never commit it.
 
-As a sleepy user, I want a clear sound, color-cycling indicator, and pick-up-and-tap instruction so that I understand the alarm is active and what to do.
+### 5. Flash the controller
 
-- At the scheduled time, sound loops, the RGB LED starts its seven-color cycle, and the active-alarm instruction appears within the agreed timing target.
-- The system logs the activation and reports missing device acknowledgment or audio playback failure.
-- There is no ordinary snooze or successful dismiss button on the active-alarm screen.
-- Maps to FR-04 and FR-09.
+Plug in the board and find its port (`/dev/cu.usbserial-*`; the CP2102 driver is built into macOS):
 
-### US-05 — Stop the alarm with the tap module
+```bash
+ls /dev/cu.*
+```
 
-As a user, I want to stop the alarm by picking up and tapping the controller across the room so that I leave the bed to reach it.
+Compile and upload (replace the port). If the upload hangs at "Connecting...", hold the board's BOOT button.
 
-- A validated tap during the active session stops the sound, disables the RGB LED, and completes that session once. Pickup is part of the intended behavior, not a separately detected event.
-- A tap while idle or armed does not pre-complete the next alarm.
-- Nearby motion and bumps are tested and unintended dismissals are recorded. If a bump triggers the switch during ringing, it may dismiss the alarm; this is a known sensing limitation.
-- Stale or duplicate events cannot complete another session.
-- Maps to FR-05.
+```bash
+arduino-cli compile --fqbn esp32:esp32:esp32 firmware/wakequest
+```
 
-### US-06 — Receive a success reward
+```bash
+arduino-cli upload --fqbn esp32:esp32:esp32 -p /dev/cu.usbserial-0001 firmware/wakequest
+```
 
-As a user, I want immediate, playful feedback after completing the interaction so that getting up feels rewarding.
+Watch the serial output. After the board joins the network, it prints its IP address:
 
-- Completion shows “Morning quest completed!”, a short celebration, 10 points, and response time.
-- Response time is labeled “Alarm response time,” measured from sound-start confirmation to accepted tap receipt; it is not labeled as time to get out of bed.
-- Duplicate completion messages do not repeat the award. Aborted runs receive no reward.
-- Maps to FR-06.
+```bash
+arduino-cli monitor -p /dev/cu.usbserial-0001 --config 115200
+```
 
-### US-07 — Record an evaluation run
+For first bring-up without Wi-Fi, `firmware/bench_probe` prints the tap level and edges and lights single colours on serial commands.
 
-As a student evaluating the prototype, I want a small event log so that I can inspect response times and distinguish success from failures.
+## Startup
 
-- Each run has a unique session ID and contains the events specified in FR-07, using the laptop's timestamps for comparable intervals.
-- Runs distinguish study, classroom demo, successful tap, manual abort, and technical failure.
-- The log is available as a simple local table or file. Demo runs are excluded from study results.
-- Separately observed bed-exit time and return-to-bed outcome can be recorded in the evaluation sheet.
-- Maps to FR-07.
+### Option A — without hardware (fake device)
 
-### US-08 — Repeat or interrupt the demonstration
+The service starts a simulated controller in-process, so the full flow runs on a laptop alone:
 
-As a presenter, I want a quick test mode and reset control so that I can reliably demonstrate the whole interaction in class.
+```bash
+WAKEQUEST_DEVICE=fake WAKEQUEST_TEST_MODE=1 uv run uvicorn wakequest.main:app --host 127.0.0.1 --port 8000
+```
 
-- “Test alarm in 10 seconds” uses the same sound, RGB LED, tap, and reward flow as a scheduled alarm.
-- The test is clearly labeled and does not alter the real study schedule or study points; its reward is a demo preview.
-- A separate presenter control can stop a run as aborted. Reset clears the active test and prepares the next run within 30 seconds.
-- If the connection drops during a run, the screen reports it, sound continues until completion or manual stop, and reconnection synchronizes the board to the current session without duplicate rewards.
-- Maps to FR-08 and FR-09.
+Open <http://127.0.0.1:8000>. Test mode adds the `/api/_test/*` hooks. With them, you can send a fake tap while the alarm rings:
 
-**Definition of done:** All eight stories can be demonstrated with real hardware, the planned functional tests have recorded outcomes, and the complete flow succeeds in five consecutive classroom rehearsals. Simulation may help development, but the final demo must include real Tap Module input and a real RGB LED Module response.
+```bash
+curl -X POST http://127.0.0.1:8000/api/_test/fake-device/tap -H 'Content-Type: application/json' -d '{}'
+```
 
-## 7. Four additional user stories for a later sprint
+The other hooks (drop the connection, power off, withhold acks) are listed in [`docs/api.md`](docs/api.md#test-hooks-wakequest_test_mode1-only-for-the-playwright-suite).
 
-These are future backlog items to illustrate how the prototype could grow. They are not needed to complete the initial sprint.
+### Option B — with the real controller
 
-| ID | User story | Acceptance criteria |
-| --- | --- | --- |
-| US-09 — Weekly schedule | As a student, I want an alarm to repeat on selected weekdays so that I do not recreate it every evening. | The user selects weekdays and a local time; the interface shows the next occurrence; disabling the schedule prevents future activations. |
-| US-10 — Streaks and badges | As a user, I want to earn a streak and badges for consecutive completed mornings so that I feel encouraged to continue. | Count at most one qualifying study/real morning per scheduled day; a missed scheduled morning breaks the streak, an unscheduled day does not; award a three-morning badge once; exclude demo runs. |
-| US-11 — Progress dashboard | As a user, I want to review my alarm response times and completion history so that I can notice patterns over time. | Show the last seven recorded mornings, including failures and aborts; distinguish tap response from any separately observed bed-exit time; show an average/median only with its sample count. |
-| US-12 — Personalize feedback | As a user, I want to choose an alarm sound and reward style so that the experience suits my preferences. | Preview and save a sound and reward style; allow a calm or reduced-animation celebration; apply the selection to the next run without changing tap completion rules. |
+1. Turn on the hotspot and connect the laptop to it.
+2. Power the controller (USB or power bank). It joins the hotspot and advertises `wakequest.local`.
+3. Start the service:
 
-## 8. Hypotheses and evaluation
+```bash
+uv run uvicorn wakequest.main:app --host 127.0.0.1 --port 8000
+```
 
-The prototype tests desirability, interaction usability, and technical feasibility. A successful demonstration establishes that the interaction works in that setting; actual mornings are needed to investigate getting out of bed faster.
+4. Open <http://127.0.0.1:8000>.
 
-| ID | Hypothesis | Measure and proposed decision rule |
-| --- | --- | --- |
-| H1 — Faster bed exit | I get out of bed sooner with WakeQuest than with my usual bedside alarm. | Compare median time from actual audible alarm onset to first fully standing beside the bed. A reduction of at least 30% is a proposed meaningful improvement for this small study. Also report the absolute difference in seconds and all noncompletions. |
-| H2 — Remaining up | Requiring the trip across the room helps me stay out of bed. | Record whether I return to bed within 10 minutes after first standing. Target at least 5 of 6 prototype mornings without returning; compare the count with baseline. |
-| H3 — Reliable interaction | The tap switch can provide a responsive, usable dismissal interaction. | At least 19/20 deliberate taps accepted within 1 second and no duplicate completions. Measure incidental dismissals in 20 nuisance trials; the switch does not verify lifting or the cause of a knock. |
-| H4 — Understandable flow | A first-time user can understand and complete setup and the tap interaction without coaching. | At least 4/5 testers complete the defined task within 2 minutes; record mistakes, hesitation, and requests for help. |
-| H5 — Appealing reward | The success feedback feels encouraging rather than irritating. | After use, ask for motivation and annoyance ratings from 1–5 and a short explanation. Explore a median motivation rating of at least 4/5 and annoyance at most 2/5; this measures reported experience, not a proven behavioral effect. |
+If `wakequest.local` does not resolve, use the IP address the board printed on serial:
 
-### Stage A — Functional and classroom tests
+```bash
+WAKEQUEST_DEVICE_HOST=172.20.10.2 uv run uvicorn wakequest.main:app --host 127.0.0.1 --port 8000
+```
 
-| Test | Procedure | Expected result |
-| --- | --- | --- |
-| T-01 Alarm input | Save a valid future alarm; try missing and past times; arm a second saved alarm. | Valid alarm appears; invalid inputs explain the problem; only the selected alarm remains armed. |
-| T-02 Readiness | First verify tap-input polarity, debounce, compatible GPIO voltage, and RGB LED on/off control and channel mapping. Then try to arm with no board, an unready input, or blocked audio, and complete setup. | Each missing prerequisite is explained; the ready configuration arms successfully. |
-| T-03 Scheduled activation | Run 10 short scheduled alarms on the awake setup and compare sound/LED onset with the scheduled time. | Both outputs activate within 2 seconds in every run; missing acknowledgments are visible. |
-| T-04 Tap sensitivity | Perform 20 deliberate taps with varied grip and tap force; record latency and misses. | At least 19 accepted within 1 second; use results to revise the detector if needed. |
-| T-05 Incidental activation | While ringing, run 20 nuisance trials: five each of walking past, nearby movement, light table taps, and small surface vibrations. Also tap the device while idle or armed. | Count and report unintended active-alarm dismissals; taps before activation never complete a future session. |
-| T-06 Event consistency | Send duplicate and stale tap/completion events; reconnect after completion; pick up again while idle. | One completion and one reward for the correct active session; no later alarm is affected. |
-| T-07 Interruption | Disconnect Wi-Fi while ringing, reconnect, and separately use presenter stop while disconnected. | Loss reported within 5 seconds; no false success; reconnection restores active or aborted state as appropriate; aborted runs receive no reward. |
-| T-08 User task | Ask five classmates to connect the preconfigured board, set an alarm, and stop it using the hardware. Give the task but no procedural coaching. | At least four succeed within 2 minutes; observations identify interaction problems. |
-| T-09 Demo rehearsal | Perform five complete demo runs, checking logs and resetting between them. | Every run completes; every reset takes at most 30 seconds; demo data is excluded from study results. |
-| T-10 Overnight readiness | Leave the chosen host, browser, board, and network in the intended overnight configuration and trigger a morning test. | Sound and RGB LED activate and tap completes the run. Resolve any sleep, sound, or connection failure before behavioral testing. |
+On macOS, the app that starts the service needs **Local Network** permission (System Settings → Privacy & Security → Local Network). Without it, the connection to the board fails with "No route to host". Terminal.app asks for this permission the first time.
 
-### Stage B — Actual morning comparison
+For an overnight run, keep the laptop awake while the service runs:
 
-**Design:** Start with an exploratory single-person comparison over 12 mornings: six baseline mornings and six prototype mornings. Use six two-morning blocks, randomly choosing baseline/prototype or prototype/baseline order within each block. Balance weekday and weekend conditions where practical. This reduces a simple “first week versus second week” order effect, but does not remove all differences between mornings.
+```bash
+caffeinate -dimsu -w $(pgrep -f "uvicorn wakequest.main")
+```
 
-- **Condition A:** Use my usual bedside alarm and usual dismissal behavior.
-- **Condition B:** Use WakeQuest, with the controller in the same location across the room each morning and browser sound already enabled.
-- Keep intended wake-up time, alarm audibility, and room arrangement as similar as practical. Record bedtime, estimated sleep duration, unusual noise, illness, and other disruptions rather than pretending they are controlled.
-- Record actual sound onset and first full stand using the same independent method in both conditions: an observer or, with consent, a recording restricted to the necessary view. Extract timestamps and delete recordings when no longer needed. Self-report alone is a weaker fallback and should be identified as such.
-- Observe bed exit for 5 minutes after sound onset. If I have not stood up, record “not up within 5 minutes.” If the alarm fails to sound, record a technical failure. Do not quietly discard either outcome.
-- For mornings when I stand, note any return to bed within the next 10 minutes. Collect a short motivation/annoyance rating and one comment after each prototype morning.
+### Running a demo in the website
 
-**Primary measure:** `time to stand = observed first full stand − actual audible alarm onset`. Define “full stand” consistently as standing upright with both feet supporting body weight, rather than merely sitting up or touching the floor.
+1. **Connect your device:** wait until the status shows "Connected" with the device ID.
+2. **Enable and test sound:** the browser only plays audio after a click.
+3. **Arm an alarm:** create a named alarm for a future time and arm it, or use **Presenter → Test alarm in 10 seconds** for a classroom run.
+4. When it rings, the LED cycles and the page says "Pick up your device and tap it". Tap the controller.
+5. The page shows "Morning quest completed!" and the alarm response time. Test alarms are labelled as demo runs and do not change the study points.
+6. **Reset demo** prepares the next run. **Stop run (aborted)** ends a run without a reward. The run log can be downloaded as CSV (all runs, study runs only, or all events).
 
-**Separate device measure:** `alarm response time = accepted tap receipt − sound-start confirmation`. This is useful for system feedback, but it is not a substitute for observing bed exit. A successful playback API call is also not independent proof that sound was audible.
+Runtime data is written to `data/` (gitignored). Set `WAKEQUEST_DATA_DIR` to use a different folder; all variables are listed in [`docs/api.md`](docs/api.md#configuration-environment-variables).
 
-**Analysis:** Report each condition's median time to stand, its absolute difference, and the percentage reduction `(baseline median − prototype median) / baseline median × 100` when the baseline median is greater than zero and both medians can be estimated. Report the full morning-by-morning results, counts of not standing within 5 minutes, technical failures, aborts, and returns to bed. If noncompletions prevent estimating a median within the observation window, report that limit and do not claim the 30% target was met using only faster completed mornings.
+## Tests
 
-This study compares the complete concept with the usual alarm. It cannot isolate whether any improvement comes from distance, tap, the website, or gamification. A later comparison of the same physical setup with rewards enabled versus disabled could investigate the reward's contribution.
+| What | Command |
+|---|---|
+| Service unit and integration tests | `uv run pytest` |
+| Website end-to-end (Chromium, fake device; starts its own service on port 8765) | `npx playwright test` |
+| Firmware logic on the host (tap detector, colour cycle, session rules) | `clang++ -std=c++17 -I firmware/wakequest firmware/test/test_logic.cpp -o build/test_logic && ./build/test_logic` |
+| Firmware compiles | `arduino-cli compile --fqbn esp32:esp32:esp32 firmware/wakequest` |
+| Real controller, without the service (stop the service first) | `uv run --no-project --with websockets python firmware/tools/device_probe.py ws://wakequest.local:81/` |
 
-### Evaluation record template
+Hardware results only count once the person at the board has confirmed them. They are recorded with date and name in [`docs/test-log.md`](docs/test-log.md).
 
-| Morning / participant code | Condition | Scheduled time | Actual sound onset | First full stand | Time to stand / noncompletion | Tap receipt, if applicable | Returned within 10 min? | Motivation / annoyance (1–5) | Sleep/context notes | Technical failure / abort |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |  |  |  |  |  |
+## Repository layout
 
-### Decisions after testing
+```
+README.md                   this file
+CLAUDE.md                   working rules for Claude Code
+docs/
+  requirements.md           requirements and evaluation brief (problem, FR/QR, user stories, hypotheses)
+  api.md                    service REST + WebSocket contract
+  protocol.md               service ↔ device WebSocket protocol
+  test-log.md               bench, firmware and end-to-end results
+  wiring.svg                wiring diagram
+Prompts/                    the process material, phase by phase
+  Phase 1 - Idea/                         initial_prompt.md
+  Phase 2 - Requirements Engineering/     context.md
+  Phase 3 - Implementation Planning /     planning_prompt.md, PLAN.md
+  Visualisations/                         showcase.html, test_protocol.html
+firmware/
+  wakequest/                main firmware (config.h has the pins; secrets.h is yours)
+  bench_probe/              no-Wi-Fi bring-up sketch
+  test/test_logic.cpp       host unit tests for the firmware logic
+  tools/device_probe.py     talks to the controller directly
+wakequest/                  Python service (FastAPI)
+web/                        website served by the service
+tests/                      pytest suite
+e2e/                        Playwright suite (one spec per user story, plus audio and accessibility)
+```
 
-- If deliberate taps are missed, revise input handling, debounce, and mounting. If bumps dismiss alarms, report the switch limitation and reconsider placement or sensing before claiming reliable pickup detection.
-- If users struggle with setup or instructions, revise those interactions before adding more features.
-- If actual bed exit improves but users return to bed, the next iteration should investigate staying up; a longer tap gesture alone does not establish that outcome.
-- If the reward is disliked, revise or simplify it and test again.
-- A successful single-person study supports a next iteration for this user. Broader claims require more participants and mornings. A staged classroom interaction supports feasibility and usability observations only.
+The Elegoo kit tutorial folder is a local, gitignored reference.
+
+## Known limitations
+
+- The tap switch detects a knock, not lifting or standing. A tap while the controller stays on the shelf also stops the alarm, and a strong bump can too. Whether you actually got up is recorded separately ([`docs/requirements.md` §8](docs/requirements.md#8-hypotheses-and-evaluation)).
+- The laptop, service and browser tab must stay running and awake. Closing the page, host sleep and power loss are outside the first sprint.
+- One user, one board, one connected browser session; one-off alarms only.
+
+## License
+
+[MIT](LICENSE)

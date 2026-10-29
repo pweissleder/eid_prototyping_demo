@@ -6,7 +6,7 @@ and returns ``Effects``: events to log, device messages to send, whether the
 alarm list must be persisted, and whether a fresh snapshot must be pushed.
 The coordinator in ``service.py`` executes those effects.
 
-Rules implemented here (see context.md §4/§6 and docs/protocol.md):
+Rules implemented here (see docs/requirements.md §4/§6 and docs/protocol.md):
 - FR-01 alarm validation; one armed alarm; arming replaces the previous one.
 - FR-02/FR-09 device status (connected only after a valid hello).
 - FR-03 arming preconditions (device connected, sensor stable, audio tested).

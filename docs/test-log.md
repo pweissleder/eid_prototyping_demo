@@ -1,6 +1,6 @@
 # WakeQuest test log
 
-Record every hardware observation here with the date and who confirmed it. A check counts as passed only when the person at the board has confirmed it. Plan of record: `PLAN.md` §3.6 and §5.
+Record every hardware observation here with the date and who confirmed it. A check counts as passed only when the person at the board has confirmed it. Plan of record: [`PLAN.md`](../Prompts/Phase%203%20-%20Implementation%20Planning%20/PLAN.md) §3.6 and §5.
 
 ## Bench bring-up (Inc 1)
 

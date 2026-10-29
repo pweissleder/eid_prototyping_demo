@@ -1,6 +1,6 @@
 # WakeQuest — working rules
 
-Prototype: website alarm stopped only by tapping an ESP32 controller across the room. Plan of record: PLAN.md.
+Prototype: website alarm stopped only by tapping an ESP32 controller across the room. Plan of record: `Prompts/Phase 3 - Implementation Planning /PLAN.md` (folder name ends in a space). Requirements: docs/requirements.md. Process overview: Prompts/Visualisations/showcase.html.
 
 ## Hardware facts (from photo + datasheets; bench-confirm and record in docs/test-log.md)
 - Board: 38-pin DevKitC-style, ESP32-WROOM-32D, CP2102 USB. 3.3 V logic; GPIO NOT 5 V tolerant. Never use the 5V pin.
