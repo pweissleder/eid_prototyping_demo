@@ -1,0 +1,35 @@
+# Initial student prompt
+
+I want to plan a demo for a university course that showcases both hardware and software prototyping.
+
+I often have problems getting out of bed in the morning. I can stop or snooze the alarm beside my bed and then go back to sleep. I want to explore a solution that makes me get out of bed before I can deactivate the alarm.
+
+My available hardware is a development board with an ESP32-WROOM-32D and modules from the Elegoo 37 Sensor Kit. Use the kit's Tap Module (Hit Sensor / knock switch) and Seven-Color Flash Module. The WROOM module has no integrated accelerometer, so the tap module is the intended input. The supplied Elegoo documents describe the parts, but their Arduino examples need adapting for the ESP32.
+
+I would put the hardware on the other side of the room, beyond reach from bed. When an alarm starts, the Seven-Color Flash Module should run its automatic color sequence to show that the alarm is active. I would walk over, pick up the controller, and tap it to stop the alarm. I understand that the switch detects the tap, not the pickup itself, and that the flash module offers on/off control rather than individually selectable colors. The website should let me add a new alarm, connect to the hardware, and show a fun, game-like success interaction when I deactivate it.
+
+Please help me turn this idea into a clear and realistic prototype plan for the course.
+
+## Expected prototype outcomes
+
+- I can create an alarm on the website and connect the ESP32-WROOM-32D board.
+- When the alarm starts, I hear a sound and the Seven-Color Flash Module starts its color sequence.
+- Picking up and tapping the device across the room stops the alarm and disables the flash module.
+- The website celebrates completion with a small animation, points, or similar feedback.
+- I can demonstrate the complete interaction in class using a short test alarm.
+- I can evaluate whether the solution helps me get out of bed quicker, rather than only stopping the alarm quicker.
+
+## Expected planning output
+
+Please provide:
+
+1. A clear problem description and a realistic morning-use scenario.
+2. A description of the prototype and the roles of its hardware and software.
+3. Functional requirements, basic quality requirements, constraints, and assumptions. Include the ESP32's 3.3 V interface requirements when adapting the kit's 5 V Arduino examples, and identify anything important that I have not specified.
+4. User stories with simple acceptance criteria for an initial sprint that delivers the complete interaction described above.
+5. Four additional user stories for possible later functionality, clearly separated from the initial sprint.
+6. The main hypotheses and a simple test plan: first check that the prototype works and is understandable, then compare it with my usual alarm on actual mornings.
+
+The main question I want to test is: **Do I get out of bed quicker with this solution?** I would also like to know whether tap detection works reliably and how often incidental bumps dismiss the alarm, whether I stay out of bed afterwards, and whether the gamified feedback feels motivating.
+
+Keep the scope manageable for a university prototype and the tests simple. Treat improvements as hypotheses to test, not as guaranteed outcomes.

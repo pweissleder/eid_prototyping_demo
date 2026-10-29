@@ -1,0 +1,14 @@
+# Local Elegoo reference bundle and matching downloaded archives
+/Elegoo 37 Sensor Kit Tutorial*/
+/Elegoo 37 Sensor Kit Tutorial*.zip
+
+# macOS metadata and resource forks (at any directory depth)
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+__MACOSX/
+.Spotlight-V100/
+.Trashes/
+.fseventsd/
+.TemporaryItems/
