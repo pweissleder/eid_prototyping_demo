@@ -12,3 +12,13 @@ __MACOSX/
 .Trashes/
 .fseventsd/
 .TemporaryItems/
+
+# WakeQuest runtime data, secrets and tooling output
+/data/
+firmware/wakequest/secrets.h
+/build/
+.venv/
+__pycache__/
+node_modules/
+test-results/
+playwright-report/

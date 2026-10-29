@@ -2,7 +2,9 @@
 
 Context for the simulated initial prompt. Extracted from the project brief: sections 1–6 and 8, with section 2 ending after the component table and the two test stages shortened. Section numbers are retained from the original brief.
 
-This describes a planned university-course prototype using an ESP32-WROOM-32D, the Elegoo Tap Module, and the Seven-Color Flash Module. Acceptance thresholds are proposed targets, not measured results.
+This describes a planned university-course prototype using an ESP32-WROOM-32D, the Elegoo Tap Module, and the Elegoo RGB LED Module. Acceptance thresholds are proposed targets, not measured results.
+
+> **Hardware update (29 Oct 2026):** the indicator is the Elegoo RGB LED Module (Lesson 11) instead of the Seven-Color Flash Module, because that is the module available. It runs a firmware-generated color cycle from 3.3 V GPIOs.
 
 ## 1. Problem description
 
@@ -18,14 +20,14 @@ The intended user is initially me: a student who struggles with dismissing morni
 
 ## 2. Concept and prototype boundary
 
-The prototype uses an ESP32-WROOM-32D with the Elegoo kit's Tap Module (also called Hit Sensor / knock switch) and Seven-Color Flash Module, connected to a website. The website plays the alarm sound. While it rings, the flash module is enabled and cycles through its colors. The intended action is to get out of bed, pick up the controller across the room, and give it a deliberate tap. An accepted tap stops the sound, switches off the flash module, and triggers the website reward.
+The prototype uses an ESP32-WROOM-32D with the Elegoo kit's Tap Module (also called Hit Sensor / knock switch) and RGB LED Module, connected to a website. The website plays the alarm sound. While it rings, the ESP32 firmware runs an automatic seven-color cycle on the RGB LED. The intended action is to get out of bed, pick up the controller across the room, and give it a deliberate tap. An accepted tap stops the sound, switches off the RGB LED, and triggers the website reward.
 
 | Part | Role in the prototype |
 | --- | --- |
 | Development board carrying an ESP32-WROOM-32D | Connects over Wi-Fi, reads the tap input, and controls the indicator. The WROOM module has no integrated accelerometer. |
 | Elegoo Tap Module / Hit Sensor, Lesson 5 | Supplies a digital knock/tap event. This is the initial-sprint input; no separate accelerometer is assumed. |
-| Elegoo Seven-Color Flash Module, Lesson 21 | Automatically cycles colors when enabled during an active alarm. Software controls on/off, not individual colors. |
-| Appropriate interface components and jumper wires | Adapt the kit's Arduino-oriented examples to 3.3 V ESP32 GPIO, including level conversion or switching where needed. |
+| Elegoo RGB LED Module, Lesson 11 | Through-hole RGB LED Module (not the SMD one) with pins R, G, B, − (common cathode on −) and three onboard 150 Ω series resistors. While an alarm rings, the ESP32 firmware runs an automatic seven-color cycle on it (red, green, blue, yellow, cyan, magenta, white); it is off otherwise. Software scope is on/off of this cycle. |
+| Jumper wires; no extra interface components needed for the indicator | Adapt the kit's Arduino-oriented examples to 3.3 V ESP32 GPIO. The RGB LED Module is driven directly from three 3.3 V GPIOs through its onboard resistors, and the Tap Module is powered from 3.3 V, so no 5 V supply, level conversion, transistor, or MOSFET is needed for the indicator. |
 | Simple hand-held housing or secured mounting | Keeps the board and modules together while the user picks up and taps the device. |
 | USB power or a suitable power bank | Powers the development board while allowing the intended movement. |
 | Website on a laptop or phone | Creates alarms, shows connection and alarm status, plays sound, and displays rewards. |
@@ -33,9 +35,9 @@ The prototype uses an ESP32-WROOM-32D with the Elegoo kit's Tap Module (also cal
 
 ## 3. Scenario
 
-**The night before:** I place the ESP32-WROOM-32D controller with its Tap Module and Seven-Color Flash Module on a shelf across the room, beyond reach from bed. I open the website, connect the board, enable and test the sound, and create an alarm for 07:00 tomorrow. The website confirms readiness and the alarm time. The flash module remains off while the alarm is only scheduled.
+**The night before:** I place the ESP32-WROOM-32D controller with its Tap Module and RGB LED Module on a shelf across the room, beyond reach from bed. I open the website, connect the board, enable and test the sound, and create an alarm for 07:00 tomorrow. The website confirms readiness and the alarm time. The RGB LED remains off while the alarm is only scheduled.
 
-**In the morning:** At 07:00, the website plays the alarm and the flash module starts its automatic color sequence. The screen says, “Pick up your device and tap it to stop the alarm.” I get out of bed, walk across the room, pick up the controller, and tap it. The accepted tap stops the sound and flash module. The website shows “Morning quest completed!” with a short animation, 10 points, and my alarm response time.
+**In the morning:** At 07:00, the website plays the alarm and the RGB LED module starts its seven-color cycle. The screen says, “Pick up your device and tap it to stop the alarm.” I get out of bed, walk across the room, pick up the controller, and tap it. The accepted tap stops the sound and switches off the RGB LED. The website shows “Morning quest completed!” with a short animation, 10 points, and my alarm response time.
 
 **Afterwards:** I can see that the interaction was completed. Whether I actually stood up and whether I returned to bed are recorded separately; the tap switch cannot establish either outcome.
 
@@ -52,8 +54,8 @@ All requirements in this section belong to the initial sprint.
 | FR-01 | The user can create and view one-off alarms with a name and a future local date/time. Invalid or past times produce an understandable error. |
 | FR-02 | The user can connect the website to one configured ESP32-WROOM-32D development board and see connecting, connected, or disconnected status based on communication with the board. |
 | FR-03 | The user can arm an alarm after the board responds, the sensor is ready, and browser audio has been enabled and tested. The next scheduled alarm is clearly displayed. |
-| FR-04 | At the scheduled time, the system starts the audible alarm, enables the Seven-Color Flash Module, and shows an active-alarm screen. |
-| FR-05 | While an alarm is active, a validated tap event from the connected device completes that alarm, stops the sound, and disables the flash module. Movement before activation cannot complete a future alarm. |
+| FR-04 | At the scheduled time, the system starts the audible alarm, enables the RGB LED module's seven-color cycle, and shows an active-alarm screen. |
+| FR-05 | While an alarm is active, a validated tap event from the connected device completes that alarm, stops the sound, and disables the RGB LED. Movement before activation cannot complete a future alarm. |
 | FR-06 | A completed alarm produces one success message, one short celebration, 10 points, and a clearly labeled alarm response time. Duplicate messages cannot award points twice. |
 | FR-07 | The system records the alarm session, mode, scheduled time, sound-start confirmation, activation acknowledgment, tap receipt, completion or abort, and connection failures. |
 | FR-08 | A presenter can run a labeled test alarm, reset the demonstration, and stop a run manually. A manual stop is recorded as aborted and earns no reward. |
@@ -63,13 +65,13 @@ All requirements in this section belong to the initial sprint.
 
 | ID | Proposed acceptance target |
 | --- | --- |
-| QR-01 | On the tested, awake setup, audible alarm and flash-module activation occur within 2 seconds of the scheduled time. Check 10 scheduled runs. |
-| QR-02 | In at least 19 of 20 deliberate tap trials, the sound stops, the flash module is disabled, and website feedback appears within 1 second of the physical tap. |
+| QR-01 | On the tested, awake setup, audible alarm and RGB LED activation occur within 2 seconds of the scheduled time. Check 10 scheduled runs. |
+| QR-02 | In at least 19 of 20 deliberate tap trials, the sound stops, the RGB LED is disabled, and website feedback appears within 1 second of the physical tap. |
 | QR-03 | No tap completes an idle or merely armed alarm. During 20 active-alarm nuisance trials, record incidental dismissals from nearby movement, surface taps, and vibrations. A knock switch cannot identify the cause of an impact; report this limitation rather than claim verified pickup. |
 | QR-04 | The website reports a lost connection within 5 seconds. State and points remain consistent after duplicate messages and reconnection. |
 | QR-05 | At least 4 of 5 first-time testers can connect a preconfigured device, create an alarm, and complete it within 2 minutes without coaching after a short task introduction. |
 | QR-06 | A presenter can reset and prepare another classroom run in at most 30 seconds. |
-| QR-07 | The interface communicates state through text as well as color and animation. The flash module is enabled only while ringing and disabled otherwise. Its internal color and blink phases do not encode separate states. |
+| QR-07 | The interface communicates state through text as well as color and animation. The RGB LED is enabled only while ringing and disabled otherwise. Its color cycle and phases do not encode separate states. |
 
 ## 5. Constraints and assumptions
 
@@ -80,12 +82,12 @@ All requirements in this section belong to the initial sprint.
 - **Scheduling:** Use one-off alarms in the host's displayed local timezone. Allow multiple saved alarms but only one armed alarm at a time; arming another clearly replaces the previous selection. Repeating schedules, timezone changes, and daylight-saving transitions are outside the initial scope.
 - **Physical placement:** Put the device beyond reach from bed, at the same location for all prototype study mornings. The user must be able to lift it without pulling loose wires or a short power cable. The system cannot enforce placement or prevent deliberate bypassing.
 - **Tap input:** The Tap Module is a digital switch, not an accelerometer. Verify its idle/active polarity and debounce it so one physical tap produces at most one accepted event. The supplied prose and sample code disagree about polarity, so confirm the actual module on the bench. It cannot verify pickup or distinguish a deliberate tap from every accidental impact.
-- **Electrical compatibility:** The kit tutorial targets 5 V UNO/Mega boards; ESP32 GPIO uses 3.3 V logic. Do not connect a 5 V module output directly to an ESP32 input. For the tap input, establish a verified 3.3 V-compatible contact/pull-up arrangement or use suitable level conversion. For the flash module, the tutorial uses 5 V: provide appropriate power and 3.3 V-controlled transistor/MOSFET switching as needed, with a common ground. Verify the actual module pin labels, current limiting, and load before wiring; do not copy Arduino D3/D13 assignments blindly. See the [Espressif electrical specifications](https://documentation.espressif.com/esp32-wroom-32d_esp32-wroom-32u_datasheet_en.html).
-- **Indicator scope:** Only enable/disable the automatic seven-color sequence. Fixed colors, RGB channels, and color-specific status meanings are outside this module's capabilities.
+- **Electrical compatibility:** ESP32 GPIO uses 3.3 V logic, while the kit tutorial targets 5 V UNO/Mega boards. Never connect a 5 V output directly to an ESP32 input. Power the Tap Module from 3.3 V so its signal never exceeds 3.3 V, and verify its contact/pull-up arrangement on the bench. The RGB LED Module needs no 5 V supply, level conversion, transistor, or MOSFET: drive its R, G, and B pins directly from three 3.3 V ESP32 GPIOs through the onboard 150 Ω series resistors, with the − pin on ground (red draws about 9 mA; green and blue are dimmer at 3.3 V because their forward voltage is 3.0–3.2 V). The kit tutorial notes that the PCB silkscreen swaps the red and blue labels, so check the actual channel mapping on the bench. Verify the actual pin labels before wiring; do not copy the Arduino pin numbers blindly. See the [Espressif electrical specifications](https://documentation.espressif.com/esp32-wroom-32d_esp32-wroom-32u_datasheet_en.html).
+- **Indicator scope:** The firmware only switches an automatic seven-color cycle (red, green, blue, yellow, cyan, magenta, white) on the RGB LED on while an alarm rings and off otherwise. Its colors and phases do not encode separate states; color-specific status meanings are out of scope by decision, although the module could show fixed colors.
 - **Power and construction:** Use readily available low-voltage components and a secured breadboard or simple enclosure. Custom PCB development, battery charging circuitry, and a manufactured enclosure are outside scope.
 - **Session persistence:** Keep the initial alarm list and event log locally for the demo/study. Automatic restart recovery, accounts, cloud synchronization, multiple users, and production deployment are outside scope.
 - **Research data:** Store only the timestamps, outcomes, and brief ratings needed for evaluation. Any observation or recording requires the participant's consent; retained logs use participant codes.
-- **Fixed parts:** Use an ESP32-WROOM-32D development board, the Elegoo Tap Module, and the Elegoo Seven-Color Flash Module. The exact carrier-board pin layout, interface components, course deadline, and available budget still need confirmation; no extra accelerometer is required for this scope.
+- **Fixed parts:** Use an ESP32-WROOM-32D development board, the Elegoo Tap Module, and the Elegoo RGB LED Module. The exact carrier-board pin layout, GPIO assignments, course deadline, and available budget still need confirmation; no extra accelerometer is required for this scope.
 
 ## 6. Initial sprint: user stories and acceptance criteria
 
@@ -115,14 +117,14 @@ As a user, I want to check the sound and sensor before arming so that I can conf
 
 - “Enable and test sound” produces an audible preview or a visible playback error.
 - Arming requires a responding board, a tap input with a verified stable idle state, and a successful sound test.
-- The screen confirms the next alarm time; the flash module remains disabled while waiting.
+- The screen confirms the next alarm time; the RGB LED remains disabled while waiting.
 - Maps to FR-03.
 
 ### US-04 — Recognize an active alarm
 
-As a sleepy user, I want a clear sound, flashing indicator, and pick-up-and-tap instruction so that I understand the alarm is active and what to do.
+As a sleepy user, I want a clear sound, color-cycling indicator, and pick-up-and-tap instruction so that I understand the alarm is active and what to do.
 
-- At the scheduled time, sound loops, the flash module starts its color cycle, and the active-alarm instruction appears within the agreed timing target.
+- At the scheduled time, sound loops, the RGB LED starts its seven-color cycle, and the active-alarm instruction appears within the agreed timing target.
 - The system logs the activation and reports missing device acknowledgment or audio playback failure.
 - There is no ordinary snooze or successful dismiss button on the active-alarm screen.
 - Maps to FR-04 and FR-09.
@@ -131,7 +133,7 @@ As a sleepy user, I want a clear sound, flashing indicator, and pick-up-and-tap 
 
 As a user, I want to stop the alarm by picking up and tapping the controller across the room so that I leave the bed to reach it.
 
-- A validated tap during the active session stops the sound, disables the flash module, and completes that session once. Pickup is part of the intended behavior, not a separately detected event.
+- A validated tap during the active session stops the sound, disables the RGB LED, and completes that session once. Pickup is part of the intended behavior, not a separately detected event.
 - A tap while idle or armed does not pre-complete the next alarm.
 - Nearby motion and bumps are tested and unintended dismissals are recorded. If a bump triggers the switch during ringing, it may dismiss the alarm; this is a known sensing limitation.
 - Stale or duplicate events cannot complete another session.
@@ -160,13 +162,13 @@ As a student evaluating the prototype, I want a small event log so that I can in
 
 As a presenter, I want a quick test mode and reset control so that I can reliably demonstrate the whole interaction in class.
 
-- “Test alarm in 10 seconds” uses the same sound, flash-module, tap, and reward flow as a scheduled alarm.
+- “Test alarm in 10 seconds” uses the same sound, RGB LED, tap, and reward flow as a scheduled alarm.
 - The test is clearly labeled and does not alter the real study schedule or study points; its reward is a demo preview.
 - A separate presenter control can stop a run as aborted. Reset clears the active test and prepares the next run within 30 seconds.
 - If the connection drops during a run, the screen reports it, sound continues until completion or manual stop, and reconnection synchronizes the board to the current session without duplicate rewards.
 - Maps to FR-08 and FR-09.
 
-**Definition of done:** All eight stories can be demonstrated with real hardware, the planned functional tests have recorded outcomes, and the complete flow succeeds in five consecutive classroom rehearsals. Simulation may help development, but the final demo must include real Tap Module input and a real Seven-Color Flash Module response.
+**Definition of done:** All eight stories can be demonstrated with real hardware, the planned functional tests have recorded outcomes, and the complete flow succeeds in five consecutive classroom rehearsals. Simulation may help development, but the final demo must include real Tap Module input and a real RGB LED Module response.
 
 ## 8. Hypotheses and evaluation
 
@@ -182,7 +184,7 @@ The prototype tests desirability, interaction usability, and technical feasibili
 
 ### Stage A — Simple functional and classroom tests
 
-- Check the tap input's polarity and debounce, the flash module's on/off control, and 3.3 V/5 V interface compatibility. Run 10 short scheduled alarms: sound and indicator should start within 2 seconds. Complete five full demos and reset each within 30 seconds.
+- Check the tap input's polarity and debounce, the RGB LED's on/off control and channel mapping, and that all GPIO signals stay within 3.3 V. Run 10 short scheduled alarms: sound and indicator should start within 2 seconds. Complete five full demos and reset each within 30 seconds.
 - Try 20 deliberate taps: accept at least 19 within 1 second without duplicate completion. Try 20 incidental movements or bumps while ringing and record unintended dismissals; the switch cannot prove pickup. Taps while idle or armed must not complete an alarm.
 - Try an invalid alarm time, blocked audio, connection loss, duplicate events, and manual stop: show clear errors, report disconnection within 5 seconds, and never award duplicate points or reward an aborted run.
 - Ask five classmates to connect the prepared board, create an alarm, and pick up and tap the controller across the room: at least four should finish within 2 minutes without coaching.
