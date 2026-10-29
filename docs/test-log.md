@@ -31,6 +31,19 @@ Firmware: `firmware/wakequest` 0.1.0, deviceId `wq-a396d0`, phone hotspot "Pasca
 | Taps sent while active | One `tap` message per tap | 5 taps → 5 `tap` messages, seq 19–23 consecutive, all with the active sessionId | 2026-10-29 / user tapped 5×, probe output read by Claude |
 | Taps while no client connected | `tapSeq` grows, nothing sent | Hello showed `tapSeq: 5` with no tap messages before connecting (consistent); later hello showed `tapSeq: 18` after taps during a failed connection attempt, none sent | 2026-10-29 / serial + probe output read by Claude |
 
+## End-to-end with real hardware (Inc 5, first run)
+
+Setup: service against the real board (`wakequest.local` via the `dns-sd` fallback), website in the app's browser pane, phone hotspot.
+
+| Run | What happened (service log, laptop clock) | Result | Date / confirmed by |
+|---|---|---|---|
+| Test alarm `s-20261029-230132-d58e` (demo) | Ring started 2 ms after its scheduled time; sound confirmed +5 ms; device light acknowledged +29 ms; tap accepted 4.9 s after the sound started; completed with 10 preview points; 0 ignored taps during the run; no technical issues | Sound, LED cycle, tap stop and reward all worked | 2026-10-29 / user ("all great"), log read by Claude |
+| Before the run | 3 taps while idle (handling the device) were logged as ignored with reason `idle` and completed nothing (US-05) | As designed | 2026-10-29 / service log |
+
+Still open for Stage A: 10 scheduled runs (QR-01), 20 deliberate taps with slow-motion video for the 1 s target (QR-02), 20 nuisance trials (QR-03), power-off during a run (QR-04), 5 timed resets (QR-06), overnight rehearsal, 5 classmate sessions (QR-05).
+
+Known small issue: with two tabs of the site open, the setup headline can say "Everything is ready" because of the other tab's sound test, while step 2 in this tab says "Not tested". Each tab keeps its own sound test by design; only the headline wording mixes them.
+
 ## Notes
 
 - 2026-10-29: the RGB channels did not light correctly at first; the user corrected the RGB wiring (tap wiring untouched), after which B4 passed. B3 and B5 were run on the unchanged tap wiring.
